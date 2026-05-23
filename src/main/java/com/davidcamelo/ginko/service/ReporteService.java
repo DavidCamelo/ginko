@@ -1,5 +1,6 @@
 package com.davidcamelo.ginko.service;
 
+import com.davidcamelo.ginko.dto.OrdenPagoDTO;
 import com.davidcamelo.ginko.dto.ReportePagoProveedorDTO;
 import com.davidcamelo.ginko.entity.OrdenPago;
 import com.davidcamelo.ginko.entity.Proveedor;
@@ -23,11 +24,8 @@ public class ReporteService {
     private final OrdenPagoRepository ordenPagoRepository;
 
     public ReportePagoProveedorDTO obtenerReportePagosPorProveedor(Long proveedorId, LocalDateTime fechaInicial, LocalDateTime fechaFinal) {
-        Proveedor proveedor = null;
-        if (proveedorId != null) {
-            proveedor = proveedorRepository.findById(proveedorId)
-                    .orElseThrow(() -> new ProveedorNoEncontradoException("Proveedor no encontrado"));
-        }
+        var proveedor = proveedorRepository.findById(proveedorId)
+                .orElseThrow(() -> new ProveedorNoEncontradoException("Proveedor no encontrado"));
         List<OrdenPago> ordenesPago;
         if (fechaInicial != null && fechaFinal != null) {
             ordenesPago = ordenPagoRepository.findAllByProveedorAndEstadoAndFechaCreacionBetween(proveedor, EstadoOrdenPago.PAGADA, fechaInicial, fechaFinal);
@@ -48,5 +46,11 @@ public class ReporteService {
                 .proveedorDTO(ProveedorMapper.mapToProveedorDTO(proveedor))
                 .ordenesPago(OrdenPagoMapper.mapToOrdenPagoDTOList(ordenesPago))
                 .build();
+    }
+
+    public List<OrdenPagoDTO> obtenerOrdenesProximasAVencer() {
+        var fechaLimite = LocalDateTime.now().minusDays(90);
+        var ordenes = ordenPagoRepository.findAllByEstadoAndFechaCreacionBefore(EstadoOrdenPago.APROBADA, fechaLimite);
+        return OrdenPagoMapper.mapToOrdenPagoDTOList(ordenes);
     }
 }

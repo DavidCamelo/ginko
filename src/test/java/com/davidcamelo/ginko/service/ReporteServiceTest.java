@@ -21,6 +21,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -101,5 +103,16 @@ class ReporteServiceTest {
         var result = reporteService.obtenerReportePagosPorProveedor(1L, null, fechaFinal);
         assertNotNull(result);
         assertEquals(BigDecimal.TEN, result.totalPagos());
+    }
+
+    @Test
+    void obtenerOrdenesProximasAVencer() {
+        ordenPago.setEstado(EstadoOrdenPago.APROBADA);
+        ordenPago.setFechaCreacion(LocalDateTime.now().minusDays(91));
+        when(ordenPagoRepository.findAllByEstadoAndFechaCreacionBefore(eq(EstadoOrdenPago.APROBADA), any(LocalDateTime.class))).thenReturn(Collections.singletonList(ordenPago));
+        var result = reporteService.obtenerOrdenesProximasAVencer();
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(ordenPago.getId(), result.getFirst().id());
     }
 }

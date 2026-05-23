@@ -20,4 +20,5 @@ public interface OrdenPagoRepository extends JpaRepository<OrdenPago, Long> {
     List<OrdenPago> findAllByProveedorAndFechaCreacionAfter(Proveedor proveedor, LocalDateTime fechaCreacionAfter);
     List<OrdenPago> findAllByProveedorAndFechaCreacionBefore(Proveedor proveedor, LocalDateTime fechaCreacionBefore);
     List<OrdenPago> findAllByProveedor(Proveedor proveedor);
+    List<OrdenPago> findAllByEstadoAndFechaCreacionBefore(EstadoOrdenPago estado, LocalDateTime fechaCreacion);
 }
