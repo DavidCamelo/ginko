@@ -4,6 +4,10 @@ import com.davidcamelo.ginko.dto.OrdenPagoDTO;
 import com.davidcamelo.ginko.entity.OrdenPago;
 import org.springframework.data.domain.Page;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
 public class OrdenPagoMapper {
 
     public static void mapToOrdenPago(OrdenPagoDTO ordenPagoDTO, OrdenPago ordenPago) {
@@ -20,6 +24,14 @@ public class OrdenPagoMapper {
                 .fechaCreacion(ordenPago.getFechaCreacion())
                 .estado(ordenPago.getEstado())
                 .build();
+    }
+
+    public static List<OrdenPagoDTO> mapToOrdenPagoDTOList(List<OrdenPago> ordenesPago) {
+        return Optional.ofNullable(ordenesPago)
+                .stream()
+                .flatMap(Collection::stream)
+                .map(OrdenPagoMapper::mapToOrdenPagoDTO)
+                .toList();
     }
 
     public static Page<OrdenPagoDTO> mapToOrdenPagoDTOPage(Page<OrdenPago> ordenPagoPage) {

@@ -2,6 +2,7 @@ package com.davidcamelo.ginko.error;
 
 import com.davidcamelo.ginko.api.OrdenPagoController;
 import com.davidcamelo.ginko.api.ProveedorController;
+import com.davidcamelo.ginko.api.ReporteController;
 import com.davidcamelo.ginko.dto.ErrorDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 @Slf4j
-@RestControllerAdvice(assignableTypes = { ProveedorController.class, OrdenPagoController.class })
+@RestControllerAdvice(assignableTypes = { ProveedorController.class, OrdenPagoController.class, ReporteController.class })
 public class GlobalControllerAdvice {
 
     @ExceptionHandler(value = { ProveedorNoEncontradoException.class, OrdenPagoNoEncontradoException.class })
