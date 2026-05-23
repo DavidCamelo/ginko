@@ -3,7 +3,6 @@ package com.davidcamelo.ginko.service;
 import com.davidcamelo.ginko.dto.OrdenPagoDTO;
 import com.davidcamelo.ginko.dto.ReportePagoProveedorDTO;
 import com.davidcamelo.ginko.entity.OrdenPago;
-import com.davidcamelo.ginko.entity.Proveedor;
 import com.davidcamelo.ginko.enums.EstadoOrdenPago;
 import com.davidcamelo.ginko.error.ProveedorNoEncontradoException;
 import com.davidcamelo.ginko.mapper.OrdenPagoMapper;

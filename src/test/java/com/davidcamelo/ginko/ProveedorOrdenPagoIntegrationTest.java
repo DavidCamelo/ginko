@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -51,7 +52,9 @@ class ProveedorOrdenPagoIntegrationTest {
                 .monto(BigDecimal.TEN)
                 .concepto("Concepto")
                 .build();
+        var idempotencyKey = UUID.randomUUID().toString();
         var ordenPagoResult = mockMvc.perform(post("/orden-pago")
+                        .header("Idempotency-Key", idempotencyKey)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(ordenPagoDTO)))
                 .andExpect(status().isOk())

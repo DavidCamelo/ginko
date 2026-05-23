@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -22,11 +23,17 @@ public class OrdenPagoService {
     private final ProveedorRepository proveedorRepository;
     private final OrdenPagoRepository ordenPagoRepository;
 
-    public OrdenPagoDTO crearOrdenPago(OrdenPagoDTO ordenPagoDTO) {
+    @Transactional
+    public OrdenPagoDTO crearOrdenPago(String idempotencyKey, OrdenPagoDTO ordenPagoDTO) {
+        var ordenExistente = ordenPagoRepository.findByIdempotencyKey(idempotencyKey);
+        if (ordenExistente.isPresent()) {
+            return OrdenPagoMapper.mapToOrdenPagoDTO(ordenExistente.get());
+        }
         var proveedor = proveedorRepository.findByIdAndEstado(ordenPagoDTO.proveedor().id(), EstadoProveedor.ACTIVO)
                 .orElseThrow(() -> new ProveedorNoEncontradoException("Proveedor activo no encontrado"));
         var ordenPago = new OrdenPago();
         ordenPago.setProveedor(proveedor);
+        ordenPago.setIdempotencyKey(idempotencyKey);
         OrdenPagoMapper.mapToOrdenPago(ordenPagoDTO, ordenPago);
         return OrdenPagoMapper.mapToOrdenPagoDTO(ordenPagoRepository.save(ordenPago));
     }

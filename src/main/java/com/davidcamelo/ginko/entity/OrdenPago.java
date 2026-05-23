@@ -41,6 +41,9 @@ public class OrdenPago {
     @Enumerated(EnumType.STRING)
     private EstadoOrdenPago estado;
 
+    @Column(unique = true)
+    private String idempotencyKey;
+
     @PrePersist
     public void prePersist() {
         fechaCreacion = LocalDateTime.now();

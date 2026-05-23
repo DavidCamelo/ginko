@@ -24,11 +24,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -47,11 +49,13 @@ class OrdenPagoServiceTest {
     private Proveedor proveedor;
     private OrdenPago ordenPago;
     private OrdenPagoDTO ordenPagoDTO;
+    private String idempotencyKey;
 
     @BeforeEach
     void setUp() {
         try (var mocks = MockitoAnnotations.openMocks(this)) {
             log.info("Configurando test {}", mocks);
+            idempotencyKey = UUID.randomUUID().toString();
             proveedor = new Proveedor();
             proveedor.setId(1L);
             proveedor.setNombreRazonSocial("Test Razon Social");
@@ -73,6 +77,7 @@ class OrdenPagoServiceTest {
             ordenPago.setConcepto("Concepto");
             ordenPago.setFechaCreacion(fechaCreacion);
             ordenPago.setEstado(EstadoOrdenPago.BORRADOR);
+            ordenPago.setIdempotencyKey(idempotencyKey);
             ordenPagoDTO = OrdenPagoDTO.builder()
                     .id(1L)
                     .proveedor(proveedorDTO)
@@ -88,20 +93,29 @@ class OrdenPagoServiceTest {
 
     @Test
     void crearOrdenPago_Success() {
+        when(ordenPagoRepository.findByIdempotencyKey(idempotencyKey)).thenReturn(Optional.empty());
         when(proveedorRepository.findByIdAndEstado(1L, EstadoProveedor.ACTIVO)).thenReturn(Optional.of(proveedor));
         when(ordenPagoRepository.save(any(OrdenPago.class))).thenReturn(ordenPago);
-
-        OrdenPagoDTO result = ordenPagoService.crearOrdenPago(ordenPagoDTO);
-
+        var result = ordenPagoService.crearOrdenPago(idempotencyKey, ordenPagoDTO);
         assertNotNull(result);
         assertEquals(ordenPago.getId(), result.id());
         verify(ordenPagoRepository).save(any(OrdenPago.class));
     }
 
     @Test
+    void crearOrdenPago_IdempotencyKeyExists() {
+        when(ordenPagoRepository.findByIdempotencyKey(idempotencyKey)).thenReturn(Optional.of(ordenPago));
+        var result = ordenPagoService.crearOrdenPago(idempotencyKey, ordenPagoDTO);
+        assertNotNull(result);
+        assertEquals(ordenPago.getId(), result.id());
+        verify(ordenPagoRepository, never()).save(any(OrdenPago.class));
+    }
+
+    @Test
     void crearOrdenPago_ProveedorNoActivo() {
+        when(ordenPagoRepository.findByIdempotencyKey(idempotencyKey)).thenReturn(Optional.empty());
         when(proveedorRepository.findByIdAndEstado(1L, EstadoProveedor.ACTIVO)).thenReturn(Optional.empty());
-        assertThrows(ProveedorNoEncontradoException.class, () -> ordenPagoService.crearOrdenPago(ordenPagoDTO));
+        assertThrows(ProveedorNoEncontradoException.class, () -> ordenPagoService.crearOrdenPago(idempotencyKey, ordenPagoDTO));
     }
 
     @Test

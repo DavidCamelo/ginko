@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,8 +28,10 @@ public class OrdenPagoController {
 
     @Operation(summary = "Crear orden de pago", description = "Crea una nueva orden de pago")
     @PostMapping
-    public ResponseEntity<OrdenPagoDTO> crearOrdenPago(@Valid @RequestBody OrdenPagoDTO ordenPagoDTO) {
-        return ResponseEntity.ok(ordenPagoService.crearOrdenPago(ordenPagoDTO));
+    public ResponseEntity<OrdenPagoDTO> crearOrdenPago(
+            @RequestHeader("Idempotency-Key") String idempotencyKey,
+            @Valid @RequestBody OrdenPagoDTO ordenPagoDTO) {
+        return ResponseEntity.ok(ordenPagoService.crearOrdenPago(idempotencyKey, ordenPagoDTO));
     }
 
     @Operation(summary = "Obtener orden de pago", description = "Obtiene una orden de pago por su ID")

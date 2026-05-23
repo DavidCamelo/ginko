@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OrdenPagoRepository extends JpaRepository<OrdenPago, Long> {
@@ -21,4 +22,5 @@ public interface OrdenPagoRepository extends JpaRepository<OrdenPago, Long> {
     List<OrdenPago> findAllByProveedorAndFechaCreacionBefore(Proveedor proveedor, LocalDateTime fechaCreacionBefore);
     List<OrdenPago> findAllByProveedor(Proveedor proveedor);
     List<OrdenPago> findAllByEstadoAndFechaCreacionBefore(EstadoOrdenPago estado, LocalDateTime fechaCreacion);
+    Optional<OrdenPago> findByIdempotencyKey(String idempotencyKey);
 }
