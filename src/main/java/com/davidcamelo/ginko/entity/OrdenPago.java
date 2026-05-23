@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -43,6 +44,9 @@ public class OrdenPago {
 
     @Column(unique = true)
     private String idempotencyKey;
+
+    @Version
+    private Long version;
 
     @PrePersist
     public void prePersist() {

@@ -5,6 +5,7 @@ import com.davidcamelo.ginko.entity.OrdenPago;
 import com.davidcamelo.ginko.entity.Proveedor;
 import com.davidcamelo.ginko.enums.EstadoOrdenPago;
 import com.davidcamelo.ginko.enums.EstadoProveedor;
+import com.davidcamelo.ginko.error.OrdenPagoConcurrentModificationException;
 import com.davidcamelo.ginko.error.OrdenPagoNoEncontradoException;
 import com.davidcamelo.ginko.error.ProveedorNoEncontradoException;
 import com.davidcamelo.ginko.error.TransicionOrdenPagoException;
@@ -14,6 +15,7 @@ import com.davidcamelo.ginko.repository.ProveedorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,19 +63,24 @@ public class OrdenPagoService {
         return OrdenPagoMapper.mapToOrdenPagoDTOPage(ordenPagoRepository.findAll(pageRequest));
     }
 
+    @Transactional
     public OrdenPagoDTO transicionarEstadoOrdenPago(Long id, EstadoOrdenPago estado) {
-        var ordenPago = obtenerOrdenPagoPorId(id);
-        var estadoActual = ordenPago.getEstado();
-        if (estadoActual.equals(EstadoOrdenPago.BORRADOR)) {
-            if (estado.equals(EstadoOrdenPago.APROBADA) || estado.equals(EstadoOrdenPago.RECHAZADA)) {
+        try {
+            var ordenPago = obtenerOrdenPagoPorId(id);
+            var estadoActual = ordenPago.getEstado();
+            if (estadoActual.equals(EstadoOrdenPago.BORRADOR)) {
+                if (estado.equals(EstadoOrdenPago.APROBADA) || estado.equals(EstadoOrdenPago.RECHAZADA)) {
+                    ordenPago.setEstado(estado);
+                    return OrdenPagoMapper.mapToOrdenPagoDTO(ordenPagoRepository.save(ordenPago));
+                }
+            } else if (estadoActual.equals(EstadoOrdenPago.APROBADA) && estado.equals(EstadoOrdenPago.PAGADA)) {
                 ordenPago.setEstado(estado);
                 return OrdenPagoMapper.mapToOrdenPagoDTO(ordenPagoRepository.save(ordenPago));
             }
-        } else if (estadoActual.equals(EstadoOrdenPago.APROBADA) && estado.equals(EstadoOrdenPago.PAGADA)) {
-            ordenPago.setEstado(estado);
-            return OrdenPagoMapper.mapToOrdenPagoDTO(ordenPagoRepository.save(ordenPago));
+            throw new TransicionOrdenPagoException("No se puede transicionar el estado de la orden de pago de " + estadoActual + " a " + estado);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            throw new OrdenPagoConcurrentModificationException("La orden de pago ha sido modificada por otro usuario. Por favor, intente de nuevo.");
         }
-        throw new TransicionOrdenPagoException("No se puede transicionar el estado de la orden de pago de " + estadoActual + " a " + estado );
     }
 
     private OrdenPago obtenerOrdenPagoPorId(Long id) {

@@ -34,6 +34,11 @@ public class GlobalControllerAdvice {
         return buildError(ex, ex.getMessage(), HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(value = { OrdenPagoConcurrentModificationException.class })
+    public ResponseEntity<ErrorDTO> manejarOrdenPagoConcurrentModificationException(OrdenPagoConcurrentModificationException ex) {
+        return buildError(ex, ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(value = { MethodArgumentNotValidException.class })
     public ResponseEntity<ErrorDTO> manejarMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         var mensaje = ex.getBindingResult().getAllErrors()
