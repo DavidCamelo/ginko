@@ -21,3 +21,10 @@ Este modulo se encarga de la creacion y gestion de las ordenes de pago a proveed
 - **Transicionar Estado de Orden de Pago:** Permite cambiar el estado de una orden de pago. Las transiciones validas son:
     - De **BORRADOR** a **APROBADA** o **RECHAZADA**.
     - De **APROBADA** a **PAGADA**.
+
+## Modulo de Reportes
+Este modulo proporciona informes y datos consolidados sobre las operaciones del sistema.
+
+### Funcionalidades
+- **Obtener Reporte de Pagos por Proveedor:** Genera un reporte que totaliza los pagos realizados a un proveedor especifico, con la opcion de filtrar por un rango de fechas.
+- **Obtener Ordenes de Pago Proximas a Vencer:** Devuelve una lista de las ordenes de pago que fueron creadas hace mas de 90 dias y que aun se encuentran en estado **APROBADA**.

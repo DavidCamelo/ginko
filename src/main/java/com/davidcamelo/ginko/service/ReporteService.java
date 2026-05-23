@@ -1,5 +1,6 @@
 package com.davidcamelo.ginko.service;
 
+import com.davidcamelo.ginko.dto.OrdenPagoDTO;
 import com.davidcamelo.ginko.dto.ReportePagoProveedorDTO;
 import com.davidcamelo.ginko.entity.OrdenPago;
 import com.davidcamelo.ginko.entity.Proveedor;
@@ -48,5 +49,11 @@ public class ReporteService {
                 .proveedorDTO(ProveedorMapper.mapToProveedorDTO(proveedor))
                 .ordenesPago(OrdenPagoMapper.mapToOrdenPagoDTOList(ordenesPago))
                 .build();
+    }
+
+    public List<OrdenPagoDTO> obtenerOrdenesProximasAVencer() {
+        var fechaLimite = LocalDateTime.now().minusDays(90);
+        var ordenes = ordenPagoRepository.findAllByEstadoAndFechaCreacionBefore(EstadoOrdenPago.APROBADA, fechaLimite);
+        return OrdenPagoMapper.mapToOrdenPagoDTOList(ordenes);
     }
 }
