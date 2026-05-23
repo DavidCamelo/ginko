@@ -1,0 +1,354 @@
+{
+  "info": {
+    "_postman_id": "d04f9a41-6f5f-4027-bb1d-a942540576c7",
+    "name": "Ginko",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "5543363"
+  },
+  "item": [
+    {
+      "name": "Proveedor",
+      "item": [
+        {
+          "name": "Crear Proveedor",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombreRazonSocial\": \"David Camelo\",\r\n  \"identificacionTributaria\": 1234567890,\r\n  \"correoElectronico\": \"correo@mail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:8080/proveedor",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "proveedor"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener Proveedor por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:8080/proveedor/1",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "proveedor",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener Proveedores",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:8080/proveedor?pageNumber=0&pageSize=10&estado=ACTIVO",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "proveedor"
+              ],
+              "query": [
+                {
+                  "key": "pageNumber",
+                  "value": "0"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                },
+                {
+                  "key": "estado",
+                  "value": "ACTIVO"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar Proveedor",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombreRazonSocial\": \"David Camelo\",\r\n  \"identificacionTributaria\": 1234567890,\r\n  \"correoElectronico\": \"correo@mail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:8080/proveedor/1",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "proveedor",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cambiar Estado Proveedor",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "localhost:8080/proveedor/1/estado",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "proveedor",
+                "1",
+                "estado"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Orden Pago",
+      "item": [
+        {
+          "name": "Crear Orden Pago",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "Idempotency-Key-value",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"proveedor\": {\r\n        \"id\": 1\r\n    },\r\n    \"monto\": 1000000,\r\n    \"concepto\": \"Concepto Orden de pago\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:8080/orden-pago",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "orden-pago"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener Ordene de Pago por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:8080/orden-pago/1",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "orden-pago",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener Ordenes de Pago",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:8080/orden-pago?pageNumber=0&pageSize=10&estado=BORRADOR&proveedorId=1",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "orden-pago"
+              ],
+              "query": [
+                {
+                  "key": "pageNumber",
+                  "value": "0"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                },
+                {
+                  "key": "estado",
+                  "value": "BORRADOR"
+                },
+                {
+                  "key": "proveedorId",
+                  "value": "1",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Transicionar Orden Pago - APROBADA",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "localhost:8080/orden-pago/1/estado/APROBADA",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "orden-pago",
+                "1",
+                "estado",
+                "APROBADA"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Transicionar Orden Pago - RECHAZADA",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "localhost:8080/orden-pago/1/estado/RECHAZADA",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "orden-pago",
+                "1",
+                "estado",
+                "RECHAZADA"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Transicionar Orden Pago - PAGADA",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "localhost:8080/orden-pago/1/estado/PAGADA",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "orden-pago",
+                "1",
+                "estado",
+                "PAGADA"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reporte",
+      "item": [
+        {
+          "name": "Pagos por proveedor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:8080/reporte/pagos-proveedor/1?fechaInicial=2026-05-01 00:00:00&fechaFinal=2026-05-31 23:59:59",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "reporte",
+                "pagos-proveedor",
+                "1"
+              ],
+              "query": [
+                {
+                  "key": "fechaInicial",
+                  "value": "2026-05-01 00:00:00"
+                },
+                {
+                  "key": "fechaFinal",
+                  "value": "2026-05-31 23:59:59",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ordenes de pago proximas a vencer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:8080/reporte/ordenes-pago/proximas-a-vencer",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "reporte",
+                "ordenes-pago",
+                "proximas-a-vencer"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
