@@ -1,5 +1,6 @@
 package com.davidcamelo.ginko.error;
 
+import com.davidcamelo.ginko.api.OrdenPagoController;
 import com.davidcamelo.ginko.api.ProveedorController;
 import com.davidcamelo.ginko.dto.ErrorDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -14,17 +15,22 @@ import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 @Slf4j
-@RestControllerAdvice(assignableTypes = { ProveedorController.class })
+@RestControllerAdvice(assignableTypes = { ProveedorController.class, OrdenPagoController.class })
 public class GlobalControllerAdvice {
 
-    @ExceptionHandler(value = { ProveedorNoEncontradoException.class })
-    public ResponseEntity<ErrorDTO> manejarNoEncontradoException(ProveedorNoEncontradoException ex) {
+    @ExceptionHandler(value = { ProveedorNoEncontradoException.class, OrdenPagoNoEncontradoException.class })
+    public ResponseEntity<ErrorDTO> manejarNoEncontradoException(RuntimeException ex) {
         return buildError(ex, ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(value = { IdentificacionTributariaException.class })
     public ResponseEntity<ErrorDTO> manejarIdentificacionTributariaException(IdentificacionTributariaException ex) {
-        return buildError(ex, ex.getMessage(), HttpStatus.BAD_REQUEST);
+        return buildError(ex, ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(value = { TransicionOrdenPagoException.class })
+    public ResponseEntity<ErrorDTO> manejarTransicionOrdenPagoException(TransicionOrdenPagoException ex) {
+        return buildError(ex, ex.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(value = { MethodArgumentNotValidException.class })

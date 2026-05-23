@@ -45,10 +45,6 @@ public class ProveedorService {
         return ProveedorMapper.mapToProveedorDTO(proveedor);
     }
 
-    public void eliminarProveedor(Long id) {
-        proveedorRepository.delete(obtenerProveedorPorId(id));
-    }
-
     private ProveedorDTO crearActualizarProveedor(ProveedorDTO proveedorDTO, Proveedor proveedor) {
         try {
             ProveedorMapper.mapToProveedor(proveedorDTO, proveedor);

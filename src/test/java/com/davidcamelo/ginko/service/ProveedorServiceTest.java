@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -145,14 +144,5 @@ class ProveedorServiceTest {
         var result = proveedorService.cambiarEstadoProveedor(1L);
         assertEquals(EstadoProveedor.INACTIVO, result.estado());
         verify(proveedorRepository).save(any(Proveedor.class));
-    }
-
-    @DisplayName("Eliminar un proveedor")
-    @Test
-    void eliminarProveedor() {
-        when(proveedorRepository.findById(1L)).thenReturn(Optional.of(proveedor));
-        doNothing().when(proveedorRepository).delete(proveedor);
-        proveedorService.eliminarProveedor(1L);
-        verify(proveedorRepository).delete(proveedor);
     }
 }
