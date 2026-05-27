@@ -19,6 +19,9 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.List;
+
 @RequiredArgsConstructor
 @Service
 public class OrdenPagoService {
@@ -63,16 +66,25 @@ public class OrdenPagoService {
         return OrdenPagoMapper.mapToOrdenPagoDTOPage(ordenPagoRepository.findAll(pageRequest));
     }
 
+    public List<OrdenPagoDTO> obtenerOrdenesPorFechas(LocalDate fechaInicio, LocalDate fechaFin) {
+        if (fechaInicio != null && fechaFin != null) {
+            return OrdenPagoMapper.mapToOrdenPagoDTOList(ordenPagoRepository.findAllByFechaVencimientoBetween(fechaInicio, fechaFin));
+        } else if (fechaInicio != null) {
+            return OrdenPagoMapper.mapToOrdenPagoDTOList(ordenPagoRepository.findAllByFechaVencimientoAfter(fechaInicio));
+        } else if (fechaFin != null) {
+            return OrdenPagoMapper.mapToOrdenPagoDTOList(ordenPagoRepository.findAllByFechaVencimientoBefore(fechaFin));
+        }
+        throw new OrdenPagoNoEncontradoException("No se encontraron ordenes de pago con las fechas ingresadas");
+    }
+
     @Transactional
     public OrdenPagoDTO transicionarEstadoOrdenPago(Long id, EstadoOrdenPago estado) {
         try {
             var ordenPago = obtenerOrdenPagoPorId(id);
             var estadoActual = ordenPago.getEstado();
-            if (estadoActual.equals(EstadoOrdenPago.BORRADOR)) {
-                if (estado.equals(EstadoOrdenPago.APROBADA) || estado.equals(EstadoOrdenPago.RECHAZADA)) {
-                    ordenPago.setEstado(estado);
-                    return OrdenPagoMapper.mapToOrdenPagoDTO(ordenPagoRepository.save(ordenPago));
-                }
+            if (estadoActual.equals(EstadoOrdenPago.BORRADOR) && (estado.equals(EstadoOrdenPago.APROBADA) || estado.equals(EstadoOrdenPago.RECHAZADA))) {
+                ordenPago.setEstado(estado);
+                return OrdenPagoMapper.mapToOrdenPagoDTO(ordenPagoRepository.save(ordenPago));
             } else if (estadoActual.equals(EstadoOrdenPago.APROBADA) && estado.equals(EstadoOrdenPago.PAGADA)) {
                 ordenPago.setEstado(estado);
                 return OrdenPagoMapper.mapToOrdenPagoDTO(ordenPagoRepository.save(ordenPago));

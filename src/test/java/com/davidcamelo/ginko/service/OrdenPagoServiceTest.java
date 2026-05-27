@@ -6,6 +6,7 @@ import com.davidcamelo.ginko.entity.OrdenPago;
 import com.davidcamelo.ginko.entity.Proveedor;
 import com.davidcamelo.ginko.enums.EstadoOrdenPago;
 import com.davidcamelo.ginko.enums.EstadoProveedor;
+import com.davidcamelo.ginko.error.OrdenPagoConcurrentModificationException;
 import com.davidcamelo.ginko.error.OrdenPagoNoEncontradoException;
 import com.davidcamelo.ginko.error.ProveedorNoEncontradoException;
 import com.davidcamelo.ginko.error.TransicionOrdenPagoException;
@@ -19,8 +20,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
@@ -70,12 +73,14 @@ class OrdenPagoServiceTest {
                     .estado(EstadoProveedor.ACTIVO)
                     .build();
             var fechaCreacion = LocalDateTime.now();
+            var fechaVencimiento = LocalDate.now().plusDays(30);
             ordenPago = new OrdenPago();
             ordenPago.setId(1L);
             ordenPago.setProveedor(proveedor);
             ordenPago.setMonto(BigDecimal.TEN);
             ordenPago.setConcepto("Concepto");
             ordenPago.setFechaCreacion(fechaCreacion);
+            ordenPago.setFechaVencimiento(fechaVencimiento);
             ordenPago.setEstado(EstadoOrdenPago.BORRADOR);
             ordenPago.setIdempotencyKey(idempotencyKey);
             ordenPagoDTO = OrdenPagoDTO.builder()
@@ -84,6 +89,7 @@ class OrdenPagoServiceTest {
                     .monto(BigDecimal.TEN)
                     .concepto("Concepto")
                     .fechaCreacion(fechaCreacion)
+                    .fechaVencimiento(fechaVencimiento)
                     .estado(EstadoOrdenPago.BORRADOR)
                     .build();
         } catch (Exception e) {
@@ -149,11 +155,82 @@ class OrdenPagoServiceTest {
     }
 
     @Test
+    void obtenerOrdenesPago_FiltroProveedorYEstado() {
+        var page = new PageImpl<>(Collections.singletonList(ordenPago));
+        when(proveedorRepository.findById(1L)).thenReturn(Optional.of(proveedor));
+        when(ordenPagoRepository.findAllByProveedorAndEstado(any(Proveedor.class), any(EstadoOrdenPago.class), any(PageRequest.class))).thenReturn(page);
+        var result = ordenPagoService.obtenerOrdenesPago(EstadoOrdenPago.BORRADOR, 1L, 0, 10);
+        assertEquals(1, result.getTotalElements());
+    }
+
+    @Test
+    void obtenerOrdenesPago_FiltroProveedor() {
+        var page = new PageImpl<>(Collections.singletonList(ordenPago));
+        when(proveedorRepository.findById(1L)).thenReturn(Optional.of(proveedor));
+        when(ordenPagoRepository.findAllByProveedor(any(Proveedor.class), any(PageRequest.class))).thenReturn(page);
+        var result = ordenPagoService.obtenerOrdenesPago(null, 1L, 0, 10);
+        assertEquals(1, result.getTotalElements());
+    }
+
+    @Test
+    void obtenerOrdenesPago_ProveedorNoEncontrado() {
+        when(proveedorRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(ProveedorNoEncontradoException.class, () -> ordenPagoService.obtenerOrdenesPago(null, 1L, 0, 10));
+    }
+
+    @Test
+    void obtenerOrdenesPorFechas_EntreFechas() {
+        var fechaInicio = LocalDate.now();
+        var fechaFin = LocalDate.now().plusDays(10);
+        when(ordenPagoRepository.findAllByFechaVencimientoBetween(fechaInicio, fechaFin))
+                .thenReturn(Collections.singletonList(ordenPago));
+        var result = ordenPagoService.obtenerOrdenesPorFechas(fechaInicio, fechaFin);
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(ordenPago.getId(), result.getFirst().id());
+    }
+
+    @Test
+    void obtenerOrdenesPorFechas_DespuesDeFecha() {
+        var fechaInicio = LocalDate.now();
+        when(ordenPagoRepository.findAllByFechaVencimientoAfter(fechaInicio))
+                .thenReturn(Collections.singletonList(ordenPago));
+        var result = ordenPagoService.obtenerOrdenesPorFechas(fechaInicio, null);
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(ordenPago.getId(), result.getFirst().id());
+    }
+
+    @Test
+    void obtenerOrdenesPorFechas_AntesDeFecha() {
+        var fechaFin = LocalDate.now().plusDays(10);
+        when(ordenPagoRepository.findAllByFechaVencimientoBefore(fechaFin))
+                .thenReturn(Collections.singletonList(ordenPago));
+        var result = ordenPagoService.obtenerOrdenesPorFechas(null, fechaFin);
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(ordenPago.getId(), result.getFirst().id());
+    }
+
+    @Test
+    void obtenerOrdenesPorFechas_ExcepcionFechasNulas() {
+        assertThrows(OrdenPagoNoEncontradoException.class, () -> ordenPagoService.obtenerOrdenesPorFechas(null, null));
+    }
+
+    @Test
     void transicionarEstadoOrdenPago_BorradorAAprobada() {
         when(ordenPagoRepository.findById(1L)).thenReturn(Optional.of(ordenPago));
         when(ordenPagoRepository.save(any(OrdenPago.class))).thenAnswer(i -> i.getArguments()[0]);
         var result = ordenPagoService.transicionarEstadoOrdenPago(1L, EstadoOrdenPago.APROBADA);
         assertEquals(EstadoOrdenPago.APROBADA, result.estado());
+    }
+    
+    @Test
+    void transicionarEstadoOrdenPago_BorradorARechazada() {
+        when(ordenPagoRepository.findById(1L)).thenReturn(Optional.of(ordenPago));
+        when(ordenPagoRepository.save(any(OrdenPago.class))).thenAnswer(i -> i.getArguments()[0]);
+        var result = ordenPagoService.transicionarEstadoOrdenPago(1L, EstadoOrdenPago.RECHAZADA);
+        assertEquals(EstadoOrdenPago.RECHAZADA, result.estado());
     }
 
     @Test
@@ -170,5 +247,19 @@ class OrdenPagoServiceTest {
         ordenPago.setEstado(EstadoOrdenPago.APROBADA);
         when(ordenPagoRepository.findById(1L)).thenReturn(Optional.of(ordenPago));
         assertThrows(TransicionOrdenPagoException.class, () -> ordenPagoService.transicionarEstadoOrdenPago(1L, EstadoOrdenPago.BORRADOR));
+    }
+    
+    @Test
+    void transicionarEstadoOrdenPago_BorradorAPagada() {
+        ordenPago.setEstado(EstadoOrdenPago.BORRADOR);
+        when(ordenPagoRepository.findById(1L)).thenReturn(Optional.of(ordenPago));
+        assertThrows(TransicionOrdenPagoException.class, () -> ordenPagoService.transicionarEstadoOrdenPago(1L, EstadoOrdenPago.PAGADA));
+    }
+    
+    @Test
+    void transicionarEstadoOrdenPago_ExcepcionConcurrencia() {
+        when(ordenPagoRepository.findById(1L)).thenReturn(Optional.of(ordenPago));
+        when(ordenPagoRepository.save(any(OrdenPago.class))).thenThrow(new ObjectOptimisticLockingFailureException(OrdenPago.class, 1L));
+        assertThrows(OrdenPagoConcurrentModificationException.class, () -> ordenPagoService.transicionarEstadoOrdenPago(1L, EstadoOrdenPago.APROBADA));
     }
 }

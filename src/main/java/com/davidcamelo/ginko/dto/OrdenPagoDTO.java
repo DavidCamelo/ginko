@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Builder
@@ -27,6 +28,9 @@ public record OrdenPagoDTO(
 
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime fechaCreacion,
+
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        LocalDate fechaVencimiento,
 
         EstadoOrdenPago estado
 ) { }

@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Setter
@@ -38,6 +39,8 @@ public class OrdenPago {
     private String concepto;
 
     private LocalDateTime fechaCreacion;
+
+    private LocalDate fechaVencimiento;
 
     @Enumerated(EnumType.STRING)
     private EstadoOrdenPago estado;

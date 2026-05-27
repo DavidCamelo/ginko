@@ -79,6 +79,7 @@ Este modulo se encarga de la creacion y gestion de las ordenes de pago a proveed
 - **Crear Orden de Pago:** Permite generar una nueva orden de pago asociada a un proveedor activo.
 - **Obtener Orden de Pago por ID:** Busca y devuelve una orden de pago especifica a partir de su ID.
 - **Obtener Lista de Ordenes de Pago:** Devuelve una lista paginada de ordenes de pago, con la opcion de filtrar por estado y/o proveedor.
+- **Obtener Órdenes por Fechas:** Permite consultar las órdenes de pago según su fecha de vencimiento, con la opción de filtrar por un rango de fechas (inicio y fin), solo por fecha de inicio o solo por fecha de fin.
 - **Transicionar Estado de Orden de Pago:** Permite cambiar el estado de una orden de pago. Las transiciones validas son:
     - De **BORRADOR** a **APROBADA** o **RECHAZADA**.
     - De **APROBADA** a **PAGADA**.
@@ -88,4 +89,4 @@ Este modulo proporciona informes y datos consolidados sobre las operaciones del 
 
 ### Funcionalidades
 - **Obtener Reporte de Pagos por Proveedor:** Genera un reporte que totaliza los pagos realizados a un proveedor especifico, con la opcion de filtrar por un rango de fechas.
-- **Obtener Ordenes de Pago Proximas a Vencer:** Devuelve una lista de las ordenes de pago que fueron creadas hace mas de 90 dias y que aun se encuentran en estado **APROBADA**.
+- **Obtener Ordenes de Pago Proximas a Vencer:** Devuelve una lista de las ordenes de pago en estado **APROBADA** cuya fecha de vencimiento se encuentre entre 30 días en el pasado y 30 días en el futuro.

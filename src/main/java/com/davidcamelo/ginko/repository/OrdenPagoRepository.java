@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +22,9 @@ public interface OrdenPagoRepository extends JpaRepository<OrdenPago, Long> {
     List<OrdenPago> findAllByProveedorAndFechaCreacionAfter(Proveedor proveedor, LocalDateTime fechaCreacionAfter);
     List<OrdenPago> findAllByProveedorAndFechaCreacionBefore(Proveedor proveedor, LocalDateTime fechaCreacionBefore);
     List<OrdenPago> findAllByProveedor(Proveedor proveedor);
-    List<OrdenPago> findAllByEstadoAndFechaCreacionBefore(EstadoOrdenPago estado, LocalDateTime fechaCreacion);
+    List<OrdenPago> findAllByEstadoAndFechaVencimientoBetween(EstadoOrdenPago estadoOrdenPago, LocalDate fechaInicial, LocalDate fechaFinal);
     Optional<OrdenPago> findByIdempotencyKey(String idempotencyKey);
+    List<OrdenPago> findAllByFechaVencimientoBetween(LocalDate fechaInicio, LocalDate fechaFin);
+    List<OrdenPago> findAllByFechaVencimientoAfter(LocalDate fechaInicio);
+    List<OrdenPago> findAllByFechaVencimientoBefore(LocalDate fechaFin);
 }

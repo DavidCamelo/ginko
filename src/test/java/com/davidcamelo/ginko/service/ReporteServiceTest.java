@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
@@ -53,6 +54,7 @@ class ReporteServiceTest {
             ordenPago.setMonto(BigDecimal.TEN);
             ordenPago.setEstado(EstadoOrdenPago.PAGADA);
             ordenPago.setFechaCreacion(LocalDateTime.now());
+            ordenPago.setFechaVencimiento(LocalDate.now());
         } catch (Exception e) {
             log.error("Error configurando test", e);
         }
@@ -108,8 +110,7 @@ class ReporteServiceTest {
     @Test
     void obtenerOrdenesProximasAVencer() {
         ordenPago.setEstado(EstadoOrdenPago.APROBADA);
-        ordenPago.setFechaCreacion(LocalDateTime.now().minusDays(91));
-        when(ordenPagoRepository.findAllByEstadoAndFechaCreacionBefore(eq(EstadoOrdenPago.APROBADA), any(LocalDateTime.class))).thenReturn(Collections.singletonList(ordenPago));
+        when(ordenPagoRepository.findAllByEstadoAndFechaVencimientoBetween(eq(EstadoOrdenPago.APROBADA), any(LocalDate.class), any(LocalDate.class))).thenReturn(Collections.singletonList(ordenPago));
         var result = reporteService.obtenerOrdenesProximasAVencer();
         assertNotNull(result);
         assertEquals(1, result.size());

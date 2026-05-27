@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +19,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Tag(name = "Orden de Pago API")
 @RequiredArgsConstructor
@@ -48,6 +52,14 @@ public class OrdenPagoController {
             @RequestParam(defaultValue = "0") Integer pageNumber,
             @RequestParam(defaultValue = "10") Integer pageSize) {
         return ResponseEntity.ok(ordenPagoService.obtenerOrdenesPago(estado, proveedorId, pageNumber, pageSize));
+    }
+
+    @Operation(summary = "Obtener ordenes de pago por fechas", description = "Obtiene las ordenes de pago con fecha de vencimiento entre la fecha inicial y la fecha final")
+    @GetMapping("obtener-por-fechas")
+    public ResponseEntity<List<OrdenPagoDTO>> obtenerOrdenesPorFechas(
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd")  LocalDate fechaInicio,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fechaFin) {
+        return ResponseEntity.ok(ordenPagoService.obtenerOrdenesPorFechas(fechaInicio, fechaFin));
     }
 
     @Operation(summary = "Transicionar Estado orden de pago", description = "Trancisiona el estado de una orden de pago")

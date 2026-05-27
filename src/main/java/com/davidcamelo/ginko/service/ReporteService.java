@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -48,8 +49,9 @@ public class ReporteService {
     }
 
     public List<OrdenPagoDTO> obtenerOrdenesProximasAVencer() {
-        var fechaLimite = LocalDateTime.now().minusDays(90);
-        var ordenes = ordenPagoRepository.findAllByEstadoAndFechaCreacionBefore(EstadoOrdenPago.APROBADA, fechaLimite);
+        var fechaInicial = LocalDate.now().minusDays(30);
+        var fechaFinal = LocalDate.now().plusDays(30);
+        var ordenes = ordenPagoRepository.findAllByEstadoAndFechaVencimientoBetween(EstadoOrdenPago.APROBADA, fechaInicial, fechaFinal);
         return OrdenPagoMapper.mapToOrdenPagoDTOList(ordenes);
     }
 }

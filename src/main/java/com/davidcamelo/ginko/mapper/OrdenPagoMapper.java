@@ -13,6 +13,7 @@ public class OrdenPagoMapper {
     public static void mapToOrdenPago(OrdenPagoDTO ordenPagoDTO, OrdenPago ordenPago) {
         ordenPago.setMonto(ordenPagoDTO.monto());
         ordenPago.setConcepto(ordenPagoDTO.concepto());
+        ordenPago.setFechaVencimiento(ordenPagoDTO.fechaVencimiento());
     }
 
     public static OrdenPagoDTO mapToOrdenPagoDTO(OrdenPago ordenPago) {
@@ -22,6 +23,7 @@ public class OrdenPagoMapper {
                 .monto(ordenPago.getMonto())
                 .concepto(ordenPago.getConcepto())
                 .fechaCreacion(ordenPago.getFechaCreacion())
+                .fechaVencimiento(ordenPago.getFechaVencimiento())
                 .estado(ordenPago.getEstado())
                 .build();
     }
